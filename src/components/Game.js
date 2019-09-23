@@ -3,59 +3,84 @@ import { Card, Button, Confirm } from 'semantic-ui-react';
 import Board from './Board';
 import History from './History';
 import ResultModal from './ResultModal';
+import { ReadHistory, WriteHistory, EmptyHistory } from '../utils/LocalStorage';
 
 class Game extends Component {
-  constructor(props) {
+  constructor() {
     super();
 
     this.state = {
-      board: new Array(props.size).fill(null)
-        .map(() => new Array(props.size).fill(null)),
-      xIsNext: Math.random() >= 0.5,
+      xIsNext: true,
       isStart: true,
       winner: null,
       open: false,
       resultModal: false,
       points: [],
+      stepNumber: 0,
     };
   }
 
+  componentDidMount() {
+    const { size } = this.props;
+    EmptyHistory(size);
+  }
+
+  jumpTo = step => {
+    const { xIsNext } = this.state;
+    this.setState({
+      xIsNext: !xIsNext,
+      stepNumber: step,
+    });
+  };
+
   handleClick = (row, col) => {
     const { X, O } = this.props;
-    const { isStart, winner, board, xIsNext } = this.state;
-    if (!isStart || winner || board[row][col]) return;
+    const { isStart, winner, xIsNext, stepNumber } = this.state;
 
-    const cloneBoard = [...board];
-    cloneBoard[row][col] = xIsNext ? X : O;
+    let history = ReadHistory().slice(0, stepNumber + 1);
 
-    this.setState(
-      prevState => ({
-        board: cloneBoard,
-        xIsNext: !prevState.xIsNext,
-      }),
-      () => {
-        const hasWinner = this.isTerminated(row, col);
-        // draw
-        if (this.isFull() && !hasWinner) {
-          this.setDraw();
-          return;
-        }
-        if (hasWinner) {
-          this.endGame(cloneBoard[row][col]);
-        }
+    // clone 2d array. vì khi slice thì array 1d chỉ là tham chiếu địa chỉ
+    const currentBoard = history[history.length - 1].board.map(arr => [...arr]);
+
+    if (!isStart || winner || currentBoard[row][col]) return;
+
+    currentBoard[row][col] = xIsNext ? X : O;
+
+    const hasWinner = this.isTerminated(currentBoard, row, col);
+
+    history = history.concat([
+      {
+        board: currentBoard,
+        lastPosition: { x: row, y: col },
       },
-    );
+    ]);
+
+    WriteHistory(history);
+
+    if (this.isFull(currentBoard) && !hasWinner) {
+      // draw
+      this.setDraw();
+    } else if (hasWinner) {
+      // win
+      this.endGame(currentBoard[row][col]);
+    }
+
+    this.setState({
+      xIsNext: !xIsNext,
+      stepNumber: history.length - 1,
+    });
   };
 
   resetGame = () => {
     const { size } = this.props;
+    EmptyHistory(size);
     this.setState({
-      board: new Array(size).fill(null).map(() => new Array(size).fill(null)),
-      xIsNext: Math.random() >= 0.5,
+      xIsNext: true,
       isStart: true,
       winner: null,
       open: false,
       resultModal: false,
+      stepNumber: 0,
     });
   };
 
@@ -73,8 +98,7 @@ class Game extends Component {
     });
   };
 
-  checkingHorizontal = (row, col) => {
-    const { board } = this.state;
+  checkingHorizontal = (board, row, col) => {
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -116,8 +140,7 @@ class Game extends Component {
     return false;
   };
 
-  checkingVertical = (row, col) => {
-    const { board } = this.state;
+  checkingVertical = (board, row, col) => {
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -159,8 +182,7 @@ class Game extends Component {
     return false;
   };
 
-  checkingMainDiagonal = (row, col) => {
-    const { board } = this.state;
+  checkingMainDiagonal = (board, row, col) => {
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -202,8 +224,7 @@ class Game extends Component {
     return false;
   };
 
-  checkingSubDiagonal = (row, col) => {
-    const { board } = this.state;
+  checkingSubDiagonal = (board, row, col) => {
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -245,18 +266,16 @@ class Game extends Component {
     return false;
   };
 
-  isTerminated = (row, col) => {
+  isTerminated = (board, row, col) => {
     return (
-      this.checkingHorizontal(row, col) ||
-      this.checkingVertical(row, col) ||
-      this.checkingMainDiagonal(row, col) ||
-      this.checkingSubDiagonal(row, col)
+      this.checkingHorizontal(board, row, col) ||
+      this.checkingVertical(board, row, col) ||
+      this.checkingMainDiagonal(board, row, col) ||
+      this.checkingSubDiagonal(board, row, col)
     );
   };
 
-  isFull = () => {
-    const { board } = this.state;
-
+  isFull = board => {
     return board.every(row => {
       return row.every(cell => cell);
     });
@@ -283,8 +302,22 @@ class Game extends Component {
     this.setWinner(player);
   };
 
+  onSortClick = () => {};
+
   render() {
-    const { board, xIsNext, open, winner, resultModal, points } = this.state;
+    /*
+
+    history = [{
+      board : ....,
+      lastPosition: {x, y}
+    }]
+
+    */
+    const history = ReadHistory();
+
+    const { xIsNext, open, winner, resultModal, points, stepNumber } = this.state;
+    const current = history[stepNumber].board;
+
     const { X, O, DRAW } = this.props;
 
     const player = xIsNext ? X : O;
@@ -306,16 +339,13 @@ class Game extends Component {
           </Card.Content>
         </Card>
 
-        <Board
-          points={points}
-          board={board}
-          xIsNext={xIsNext}
-          onClick={this.handleClick} />
+        <Board points={points} board={current} xIsNext={xIsNext} onClick={this.handleClick} />
 
-        <History />
+        <History history={history} onSortClick={this.onSortClick} onMoveClick={this.jumpTo} />
 
         <Confirm
           open={open}
+          size="tiny"
           header="Reset game"
           content="Do you want to reset this game?"
           onCancel={this.toggleConfirm}

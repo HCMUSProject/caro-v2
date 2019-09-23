@@ -6,14 +6,15 @@
     "codeFrame": false
   },
   "extends": ["airbnb", "prettier", "prettier/react"],
+  "plugins": ["react", "prettier"],
   "env": {
     "browser": true,
     "jest": true
   },
   "rules": {
-    "max-len": ["error", 80, 2, { "ignoreUrls": true }],
+    "max-len": ["error", 100, 2, { "ignoreUrls": true }],
     "prefer-promise-reject-errors": ["off"],
-    "react/jsx-filename-extension": ["off"],
+    "react/jsx-filename-extension": ["error", { "extensions": [".js", "jsx"] }],
     "react/prop-types": ["off"],
     "no-return-assign": ["off"]
   }
