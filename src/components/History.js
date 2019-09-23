@@ -1,19 +1,31 @@
 import React from 'react';
 import { Card, List, Button } from 'semantic-ui-react';
 
-const History = ({ history, onMoveClick, onSortClick }) => {
+const History = ({ history, jumpTo, toggleSort, selected, sort }) => {
   const renderMoves = () => {
     if (!history) return <></>;
 
-    return history.map((step, move) => {
-      const { lastPosition } = step;
-      const desc = move
-        ? `Move to #${move}. Position [${lastPosition.x},${lastPosition.y}]`
+    // default : sort = true
+    history.sort((p1, p2) => {
+      return p1.id <= p2.id === sort ? -1 : 1;
+    });
+
+    return history.map(step => {
+      const { lastPosition, id } = step;
+      const desc = id
+        ? `Move to #${id}. Position [${lastPosition.x},${lastPosition.y}]`
         : 'Go to game start';
+
+      const isSelect = id === selected;
       return (
         // eslint-disable-next-line react/no-array-index-key
-        <List.Item key={move}>
-          <Button size="small" fluid onClick={() => onMoveClick(move)}>
+        <List.Item key={id}>
+          <Button
+            primary={isSelect}
+            size="small"
+            fluid
+            onClick={() => jumpTo(id)}
+          >
             {desc}
           </Button>
         </List.Item>
@@ -21,12 +33,19 @@ const History = ({ history, onMoveClick, onSortClick }) => {
     });
   };
 
+  const sortIcon = sort ? 'angle down' : 'angle up';
+
   return (
     <Card className="history-block">
       <Card.Content>
         <div className="box-title">
           <h6 className="history-title">History</h6>
-          <Button circular size="mini" icon="angle down" onClick={onSortClick} />
+          <Button
+            size="mini"
+            icon={sortIcon}
+            onClick={toggleSort}
+            label="Order by"
+          />
         </div>
 
         <Card.Description className="history-items">

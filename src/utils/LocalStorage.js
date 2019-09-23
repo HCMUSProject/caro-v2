@@ -13,6 +13,7 @@ function EmptyHistory(size) {
     {
       board: new Array(size).fill(null).map(() => new Array(size).fill(null)),
       lastPosition: null,
+      id: 0,
     },
   ];
   WriteHistory(history);

@@ -17,6 +17,7 @@ class Game extends Component {
       resultModal: false,
       points: [],
       stepNumber: 0,
+      sortASC: true,
     };
   }
 
@@ -26,9 +27,8 @@ class Game extends Component {
   }
 
   jumpTo = step => {
-    const { xIsNext } = this.state;
     this.setState({
-      xIsNext: !xIsNext,
+      xIsNext: step % 2 === 0,
       stepNumber: step,
     });
   };
@@ -52,6 +52,7 @@ class Game extends Component {
       {
         board: currentBoard,
         lastPosition: { x: row, y: col },
+        id: stepNumber + 1,
       },
     ]);
 
@@ -294,7 +295,7 @@ class Game extends Component {
     this.setState({
       isStart: false,
       winner: player,
-      resultModal: true,
+      // resultModal: true,
     });
   };
 
@@ -302,7 +303,12 @@ class Game extends Component {
     this.setWinner(player);
   };
 
-  onSortClick = () => {};
+  toggleSort = () => {
+    const { sortASC } = this.state;
+    this.setState({
+      sortASC: !sortASC,
+    });
+  };
 
   render() {
     /*
@@ -315,7 +321,15 @@ class Game extends Component {
     */
     const history = ReadHistory();
 
-    const { xIsNext, open, winner, resultModal, points, stepNumber } = this.state;
+    const {
+      xIsNext,
+      open,
+      winner,
+      resultModal,
+      points,
+      stepNumber,
+      sortASC,
+    } = this.state;
     const current = history[stepNumber].board;
 
     const { X, O, DRAW } = this.props;
@@ -339,9 +353,20 @@ class Game extends Component {
           </Card.Content>
         </Card>
 
-        <Board points={points} board={current} xIsNext={xIsNext} onClick={this.handleClick} />
+        <Board
+          points={points}
+          board={current}
+          xIsNext={xIsNext}
+          onClick={this.handleClick}
+        />
 
-        <History history={history} onSortClick={this.onSortClick} onMoveClick={this.jumpTo} />
+        <History
+          history={history}
+          sort={sortASC}
+          toggleSort={this.toggleSort}
+          jumpTo={this.jumpTo}
+          selected={stepNumber}
+        />
 
         <Confirm
           open={open}

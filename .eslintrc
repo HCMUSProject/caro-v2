@@ -12,10 +12,12 @@
     "jest": true
   },
   "rules": {
-    "max-len": ["error", 100, 2, { "ignoreUrls": true }],
+    "max-len": ["error", 80, 2, { "ignoreUrls": true }],
     "prefer-promise-reject-errors": ["off"],
     "react/jsx-filename-extension": ["error", { "extensions": [".js", "jsx"] }],
     "react/prop-types": ["off"],
-    "no-return-assign": ["off"]
+    "no-return-assign": ["off"],
+    "quotes": ["error", "single"],
+    "jsx-quotes": ["error", "prefer-single"]
   }
 }
