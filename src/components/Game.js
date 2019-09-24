@@ -12,7 +12,6 @@ class Game extends Component {
       xIsNext: true,
       winner: null,
       open: false,
-      points: [],
       stepNumber: 0,
       sortASC: true,
     };
@@ -44,13 +43,11 @@ class Game extends Component {
 
     currentBoard[row][col] = xIsNext ? X : O;
 
-    const hasWinner = this.isTerminated(currentBoard, row, col);
+    const result = this.isTerminated(currentBoard, row, col);
 
     let strWinner = null;
-    if (!hasWinner && this.isFull(currentBoard)) strWinner = DRAW;
-    else if (hasWinner) strWinner = currentBoard[row][col];
-
-    console.log(strWinner);
+    if (!result.hasWinner && this.isFull(currentBoard)) strWinner = DRAW;
+    else if (result.hasWinner) strWinner = currentBoard[row][col];
 
     history = history.concat([
       {
@@ -58,6 +55,7 @@ class Game extends Component {
         lastPosition: { x: row, y: col },
         id: stepNumber + 1,
         winner: strWinner,
+        points: result.points,
       },
     ]);
 
@@ -89,6 +87,8 @@ class Game extends Component {
   };
 
   checkingHorizontal = (board, row, col) => {
+    const points = [];
+
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -98,11 +98,13 @@ class Game extends Component {
 
     // count = 1 la vi tri hien tai.
     let count = 1;
+    points.push({ row, col });
 
     // dem ve 2 ben
     for (let i = col - 1; i >= 0; i -= 1) {
       if (board[row][i] === curPlayer) {
         count += 1;
+        points.push({ row, col: i });
       } else {
         if (board[row][i] !== null) {
           isBlockOutAbove = true;
@@ -113,6 +115,7 @@ class Game extends Component {
     for (let i = col + 1; i < size; i += 1) {
       if (board[row][i] === curPlayer) {
         count += 1;
+        points.push({ row, col: i });
       } else {
         if (board[row][i] !== null) {
           isBlockOutBelow = true;
@@ -123,14 +126,30 @@ class Game extends Component {
 
     if (count >= numToWin) {
       if (count > numToWin) {
-        return true;
+        return {
+          hasWinner: true,
+          points,
+        };
       }
-      return !(isBlockOutAbove && isBlockOutBelow);
+      return {
+        hasWinner: !(isBlockOutAbove && isBlockOutBelow),
+        points: !(isBlockOutAbove && isBlockOutBelow) ? points : [],
+      };
     }
-    return false;
+    // if (count >= numToWin) {
+    //   if (count > numToWin) {
+    //     return true;
+    //   }
+    //   return !(isBlockOutAbove && isBlockOutBelow);
+    // }
+    return {
+      hasWinner: false,
+      points: [],
+    };
   };
 
   checkingVertical = (board, row, col) => {
+    const points = [];
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -140,11 +159,13 @@ class Game extends Component {
 
     // count = 1 la vi tri hien tai.
     let count = 1;
+    points.push({ row, col });
 
     // dem ve 2 ben
     for (let i = row - 1; i >= 0; i -= 1) {
       if (board[i][col] === curPlayer) {
         count += 1;
+        points.push({ row: i, col });
       } else {
         if (board[i][col] !== null) {
           isBlockOutAbove = true;
@@ -155,6 +176,7 @@ class Game extends Component {
     for (let i = row + 1; i < size; i += 1) {
       if (board[i][col] === curPlayer) {
         count += 1;
+        points.push({ row: i, col });
       } else {
         if (board[i][col] !== null) {
           isBlockOutBelow = true;
@@ -165,14 +187,24 @@ class Game extends Component {
 
     if (count >= numToWin) {
       if (count > numToWin) {
-        return true;
+        return {
+          hasWinner: true,
+          points,
+        };
       }
-      return !(isBlockOutAbove && isBlockOutBelow);
+      return {
+        hasWinner: !(isBlockOutAbove && isBlockOutBelow),
+        points: !(isBlockOutAbove && isBlockOutBelow) ? points : [],
+      };
     }
-    return false;
+    return {
+      hasWinner: false,
+      points: [],
+    };
   };
 
   checkingMainDiagonal = (board, row, col) => {
+    const points = [];
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -181,11 +213,13 @@ class Game extends Component {
     const curPlayer = board[row][col];
     // count = 1 la vi tri hien tai.
     let count = 1;
+    points.push({ row, col });
 
     // dem ve 2 ben
     for (let i = row - 1, j = col - 1; i >= 0 && j >= 0; i -= 1, j -= 1) {
       if (board[i][j] === curPlayer) {
         count += 1;
+        points.push({ row: i, col: j });
       } else {
         if (board[i][j] !== null) {
           isBlockOutAbove = true;
@@ -197,6 +231,7 @@ class Game extends Component {
     for (let i = row + 1, j = col + 1; i < size && j < size; i += 1, j += 1) {
       if (board[i][j] === curPlayer) {
         count += 1;
+        points.push({ row: i, col: j });
       } else {
         if (board[i][j] !== null) {
           isBlockOutBelow = true;
@@ -207,14 +242,24 @@ class Game extends Component {
 
     if (count >= numToWin) {
       if (count > numToWin) {
-        return true;
+        return {
+          hasWinner: true,
+          points,
+        };
       }
-      return !(isBlockOutAbove && isBlockOutBelow);
+      return {
+        hasWinner: !(isBlockOutAbove && isBlockOutBelow),
+        points: !(isBlockOutAbove && isBlockOutBelow) ? points : [],
+      };
     }
-    return false;
+    return {
+      hasWinner: false,
+      points: [],
+    };
   };
 
   checkingSubDiagonal = (board, row, col) => {
+    const points = [];
     const { size, numToWin } = this.props;
 
     let isBlockOutAbove = false;
@@ -223,11 +268,13 @@ class Game extends Component {
     const curPlayer = board[row][col];
     // count = 1 la vi tri hien tai.
     let count = 1;
+    points.push({ row, col });
 
     // dem ve 2 ben
     for (let i = row - 1, j = col + 1; i >= 0 && j < size; i -= 1, j += 1) {
       if (board[i][j] === curPlayer) {
         count += 1;
+        points.push({ row: i, col: j });
       } else {
         if (board[i][j] !== null) {
           isBlockOutAbove = true;
@@ -239,6 +286,7 @@ class Game extends Component {
     for (let i = row + 1, j = col - 1; i < size && j >= 0; i += 1, j -= 1) {
       if (board[i][j] === curPlayer) {
         count += 1;
+        points.push({ row: i, col: j });
       } else {
         if (board[i][j] !== null) {
           isBlockOutBelow = true;
@@ -249,20 +297,47 @@ class Game extends Component {
 
     if (count >= numToWin) {
       if (count > numToWin) {
-        return true;
+        return {
+          hasWinner: true,
+          points,
+        };
       }
-      return !(isBlockOutAbove && isBlockOutBelow);
+      return {
+        hasWinner: !(isBlockOutAbove && isBlockOutBelow),
+        points: !(isBlockOutAbove && isBlockOutBelow) ? points : [],
+      };
     }
-    return false;
+    return {
+      hasWinner: false,
+      points: [],
+    };
   };
 
   isTerminated = (board, row, col) => {
-    return (
-      this.checkingHorizontal(board, row, col) ||
-      this.checkingVertical(board, row, col) ||
-      this.checkingMainDiagonal(board, row, col) ||
-      this.checkingSubDiagonal(board, row, col)
-    );
+    const retH = this.checkingHorizontal(board, row, col);
+    const retV = this.checkingVertical(board, row, col);
+    const retM = this.checkingMainDiagonal(board, row, col);
+    const retS = this.checkingSubDiagonal(board, row, col);
+
+    const desPoints = retH.points.concat(retV.points, retM.points, retS.points);
+
+    for (let i = 0; i < desPoints.length - 1; i += 1) {
+      for (let j = i + 1; j < desPoints.length; j += 1) {
+        if (
+          desPoints[i].row === desPoints[j].row &&
+          desPoints[i].col === desPoints[j].col
+        ) {
+          desPoints.splice(i, 1);
+        }
+      }
+    }
+
+    const ret = {
+      hasWinner:
+        retH.hasWinner || retV.hasWinner || retM.hasWinner || retS.hasWinner,
+      points: desPoints,
+    };
+    return ret;
   };
 
   isFull = board => {
@@ -284,13 +359,16 @@ class Game extends Component {
     history = [{
       board : ....,
       lastPosition: {x, y}
+      id -> stepNumber,
+      winner,
+      points
     }]
 
     */
     const history = ReadHistory();
 
-    const { xIsNext, open, winner, points, stepNumber, sortASC } = this.state;
-    const current = history[stepNumber].board;
+    const { xIsNext, open, winner, stepNumber, sortASC } = this.state;
+    const { board: current, points } = history[stepNumber];
 
     const { X, O } = this.props;
 
@@ -359,8 +437,8 @@ class Game extends Component {
 }
 
 Game.defaultProps = {
-  size: 3,
-  numToWin: 3,
+  size: 20,
+  numToWin: 5,
   X: 'X',
   O: 'O',
   DRAW: 'XO',

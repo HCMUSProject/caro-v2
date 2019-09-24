@@ -55,6 +55,7 @@
   margin: 1px;
   padding: 0;
   background-color: #fff;
+  transition: background-color 0.3s ease;
 }
 
 button.board-cell {
@@ -78,6 +79,10 @@ button.board-cell {
 .board-cell.not-clickable,
 .board-cell.not-clickable {
   cursor: not-allowed;
+}
+
+.board-cell.winning-cell {
+  background-color: #ced6e0;
 }
 
 .result-wrapper {

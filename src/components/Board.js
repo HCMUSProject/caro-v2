@@ -1,14 +1,17 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Cell from './Cell';
 
-class Board extends Component {
-  renderBoard = () => {
-    const { board, size, onClick, winner } = this.props;
+const Board = ({ board, size, onClick, winner, points }) => {
+  const renderBoard = () => {
     return board.map((row, iRow) => {
       return (
         // eslint-disable-next-line react/no-array-index-key
         <div key={iRow} className='board-row'>
           {row.map((cell, iCol) => {
+            // check ô này có nằm trong danh sách point win hay không
+            const isWinningCell =
+              points &&
+              points.some(val => val.row === iRow && val.col === iCol);
             return (
               <Cell
                 // eslint-disable-next-line react/no-array-index-key
@@ -19,6 +22,7 @@ class Board extends Component {
                 // eslint-disable-next-line no-shadow
                 onClick={onClick}
                 winner={winner}
+                isWinningCell={isWinningCell}
               />
             );
           })}
@@ -26,11 +30,8 @@ class Board extends Component {
       );
     });
   };
-
-  render() {
-    return <div id='board'>{this.renderBoard()}</div>;
-  }
-}
+  return <div id='board'>{renderBoard()}</div>;
+};
 
 Board.defaultProps = {
   size: 20,
