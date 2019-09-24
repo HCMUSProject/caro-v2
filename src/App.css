@@ -28,6 +28,7 @@
   font-size: 20px;
   min-width: 170px;
   box-shadow: none !important;
+  min-width: 290px;
 }
 
 .game-info .player {
