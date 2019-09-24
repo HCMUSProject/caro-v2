@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Card, Button, Confirm } from 'semantic-ui-react';
 import Board from './Board';
 import History from './History';
-import ResultModal from './ResultModal';
 import { ReadHistory, WriteHistory, EmptyHistory } from '../utils/LocalStorage';
 
 class Game extends Component {
@@ -11,10 +10,8 @@ class Game extends Component {
 
     this.state = {
       xIsNext: true,
-      isStart: true,
       winner: null,
       open: false,
-      resultModal: false,
       points: [],
       stepNumber: 0,
       sortASC: true,
@@ -24,58 +21,52 @@ class Game extends Component {
   }
 
   jumpTo = step => {
-    const { stepNumber, winner } = this.state;
-    if (step === stepNumber && winner) {
-      this.setState({
-        xIsNext: step % 2 === 0,
-        stepNumber: step,
-      });
-    } else {
-      this.setState({
-        xIsNext: step % 2 === 0,
-        stepNumber: step,
-        winner: null,
-        isStart: true,
-      });
-    }
+    // lay winner trong history
+    const current = ReadHistory()[step];
+
+    this.setState({
+      xIsNext: step % 2 === 0,
+      stepNumber: step,
+      winner: current.winner,
+    });
   };
 
   handleClick = (row, col) => {
-    const { X, O } = this.props;
-    const { isStart, winner, xIsNext, stepNumber } = this.state;
+    const { X, O, DRAW } = this.props;
+    const { winner, xIsNext, stepNumber } = this.state;
 
     let history = ReadHistory().slice(0, stepNumber + 1);
 
     // clone 2d array. vì khi slice thì array 1d chỉ là tham chiếu địa chỉ
     const currentBoard = history[history.length - 1].board.map(arr => [...arr]);
 
-    if (!isStart || winner || currentBoard[row][col]) return;
+    if (winner || currentBoard[row][col]) return;
 
     currentBoard[row][col] = xIsNext ? X : O;
 
     const hasWinner = this.isTerminated(currentBoard, row, col);
+
+    let strWinner = null;
+    if (!hasWinner && this.isFull(currentBoard)) strWinner = DRAW;
+    else if (hasWinner) strWinner = currentBoard[row][col];
+
+    console.log(strWinner);
 
     history = history.concat([
       {
         board: currentBoard,
         lastPosition: { x: row, y: col },
         id: stepNumber + 1,
+        winner: strWinner,
       },
     ]);
 
     WriteHistory(history);
 
-    if (this.isFull(currentBoard) && !hasWinner) {
-      // draw
-      this.setDraw();
-    } else if (hasWinner) {
-      // win
-      this.endGame(currentBoard[row][col]);
-    }
-
     this.setState({
       xIsNext: !xIsNext,
       stepNumber: history.length - 1,
+      winner: strWinner,
     });
   };
 
@@ -84,10 +75,8 @@ class Game extends Component {
     EmptyHistory(size);
     this.setState({
       xIsNext: true,
-      isStart: true,
       winner: null,
       open: false,
-      resultModal: false,
       stepNumber: 0,
     });
   };
@@ -96,13 +85,6 @@ class Game extends Component {
     const { open } = this.state;
     this.setState({
       open: !open,
-    });
-  };
-
-  toggleResultModal = () => {
-    const { resultModal } = this.state;
-    this.setState({
-      resultModal: !resultModal,
     });
   };
 
@@ -289,27 +271,6 @@ class Game extends Component {
     });
   };
 
-  setDraw = () => {
-    const { XO } = this.props;
-    this.setState({
-      isStart: false,
-      winner: XO,
-      resultModal: true,
-    });
-  };
-
-  setWinner = player => {
-    this.setState({
-      isStart: false,
-      winner: player,
-      // resultModal: true,
-    });
-  };
-
-  endGame = player => {
-    this.setWinner(player);
-  };
-
   toggleSort = () => {
     const { sortASC } = this.state;
     this.setState({
@@ -328,19 +289,10 @@ class Game extends Component {
     */
     const history = ReadHistory();
 
-    const {
-      xIsNext,
-      open,
-      winner,
-      resultModal,
-      points,
-      stepNumber,
-      sortASC,
-      isStart,
-    } = this.state;
+    const { xIsNext, open, winner, points, stepNumber, sortASC } = this.state;
     const current = history[stepNumber].board;
 
-    const { X, O, DRAW } = this.props;
+    const { X, O } = this.props;
 
     const player = xIsNext ? X : O;
 
@@ -382,7 +334,7 @@ class Game extends Component {
           board={current}
           xIsNext={xIsNext}
           onClick={this.handleClick}
-          start={isStart}
+          winner={winner}
         />
 
         <History
@@ -401,21 +353,14 @@ class Game extends Component {
           onCancel={this.toggleConfirm}
           onConfirm={this.resetGame}
         />
-
-        <ResultModal
-          open={resultModal}
-          winner={winner}
-          onClick={this.resetGame}
-          isDraw={winner === DRAW}
-        />
       </div>
     );
   }
 }
 
 Game.defaultProps = {
-  size: 20,
-  numToWin: 5,
+  size: 3,
+  numToWin: 3,
   X: 'X',
   O: 'O',
   DRAW: 'XO',

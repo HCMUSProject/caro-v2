@@ -1,9 +1,9 @@
 import React from 'react';
 
-const Cell = ({ row, col, val, onClick, start }) => {
+const Cell = ({ row, col, val, onClick, winner }) => {
   let notClickable = ' not-clickable';
 
-  if (start && !val) {
+  if (!winner && !val) {
     notClickable = '';
   }
 

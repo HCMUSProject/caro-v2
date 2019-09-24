@@ -3,7 +3,7 @@ import Cell from './Cell';
 
 class Board extends Component {
   renderBoard = () => {
-    const { board, size, onClick, start } = this.props;
+    const { board, size, onClick, winner } = this.props;
     return board.map((row, iRow) => {
       return (
         // eslint-disable-next-line react/no-array-index-key
@@ -18,7 +18,7 @@ class Board extends Component {
                 val={cell}
                 // eslint-disable-next-line no-shadow
                 onClick={onClick}
-                start={start}
+                winner={winner}
               />
             );
           })}
