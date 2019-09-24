@@ -3,11 +3,11 @@ import Cell from './Cell';
 
 class Board extends Component {
   renderBoard = () => {
-    const { board, size, onClick } = this.props;
+    const { board, size, onClick, start } = this.props;
     return board.map((row, iRow) => {
       return (
         // eslint-disable-next-line react/no-array-index-key
-        <div key={iRow} className="board-row">
+        <div key={iRow} className='board-row'>
           {row.map((cell, iCol) => {
             return (
               <Cell
@@ -18,6 +18,7 @@ class Board extends Component {
                 val={cell}
                 // eslint-disable-next-line no-shadow
                 onClick={onClick}
+                start={start}
               />
             );
           })}
@@ -27,7 +28,7 @@ class Board extends Component {
   };
 
   render() {
-    return <div id="board">{this.renderBoard()}</div>;
+    return <div id='board'>{this.renderBoard()}</div>;
   }
 }
 

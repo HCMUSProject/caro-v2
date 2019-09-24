@@ -6,7 +6,7 @@ import ResultModal from './ResultModal';
 import { ReadHistory, WriteHistory, EmptyHistory } from '../utils/LocalStorage';
 
 class Game extends Component {
-  constructor() {
+  constructor(props) {
     super();
 
     this.state = {
@@ -19,18 +19,25 @@ class Game extends Component {
       stepNumber: 0,
       sortASC: true,
     };
-  }
 
-  componentDidMount() {
-    const { size } = this.props;
-    EmptyHistory(size);
+    EmptyHistory(props.size);
   }
 
   jumpTo = step => {
-    this.setState({
-      xIsNext: step % 2 === 0,
-      stepNumber: step,
-    });
+    const { stepNumber, winner } = this.state;
+    if (step === stepNumber && winner) {
+      this.setState({
+        xIsNext: step % 2 === 0,
+        stepNumber: step,
+      });
+    } else {
+      this.setState({
+        xIsNext: step % 2 === 0,
+        stepNumber: step,
+        winner: null,
+        isStart: true,
+      });
+    }
   };
 
   handleClick = (row, col) => {
@@ -329,24 +336,41 @@ class Game extends Component {
       points,
       stepNumber,
       sortASC,
+      isStart,
     } = this.state;
     const current = history[stepNumber].board;
 
     const { X, O, DRAW } = this.props;
 
     const player = xIsNext ? X : O;
-    return (
-      <div className="game-wrapper">
-        <Card className="game-info">
-          <Card.Content>
-            <Card.Header as="h1">Caro Vietnam</Card.Header>
-            <Card.Description>
-              <p>
-                Player: &nbsp;
-                <span className={`player${` ${player}`}`}>{player}</span>
-              </p>
 
-              <Button size="small" onClick={this.toggleConfirm}>
+    const showPlayer = () => {
+      if (winner) {
+        return (
+          <>
+            Winner: &nbsp;
+            <span className={`player${` ${winner}`}`}>{winner}</span>
+          </>
+        );
+      }
+
+      return (
+        <>
+          Player: &nbsp;
+          <span className={`player${` ${player}`}`}>{player}</span>
+        </>
+      );
+    };
+
+    return (
+      <div className='game-wrapper'>
+        <Card className='game-info'>
+          <Card.Content>
+            <Card.Header as='h1'>Caro Vietnam</Card.Header>
+            <Card.Description>
+              <p>{showPlayer()}</p>
+
+              <Button size='small' onClick={this.toggleConfirm}>
                 Reset game
               </Button>
             </Card.Description>
@@ -358,6 +382,7 @@ class Game extends Component {
           board={current}
           xIsNext={xIsNext}
           onClick={this.handleClick}
+          start={isStart}
         />
 
         <History
@@ -370,9 +395,9 @@ class Game extends Component {
 
         <Confirm
           open={open}
-          size="tiny"
-          header="Reset game"
-          content="Do you want to reset this game?"
+          size='tiny'
+          header='Reset game'
+          content='Do you want to reset this game?'
           onCancel={this.toggleConfirm}
           onConfirm={this.resetGame}
         />

@@ -74,8 +74,8 @@ button.board-cell {
   color: #27ae60;
 }
 
-.board-cell.X,
-.board-cell.O {
+.board-cell.not-clickable,
+.board-cell.not-clickable {
   cursor: not-allowed;
 }
 

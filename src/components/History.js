@@ -22,7 +22,7 @@ const History = ({ history, jumpTo, toggleSort, selected, sort }) => {
         <List.Item key={id}>
           <Button
             primary={isSelect}
-            size="small"
+            size='small'
             fluid
             onClick={() => jumpTo(id)}
           >
@@ -36,19 +36,19 @@ const History = ({ history, jumpTo, toggleSort, selected, sort }) => {
   const sortIcon = sort ? 'angle down' : 'angle up';
 
   return (
-    <Card className="history-block">
+    <Card className='history-block'>
       <Card.Content>
-        <div className="box-title">
-          <h6 className="history-title">History</h6>
+        <div className='box-title'>
+          <h6 className='history-title'>History</h6>
           <Button
-            size="mini"
+            size='mini'
             icon={sortIcon}
             onClick={toggleSort}
-            label="Order by"
+            label='Order by'
           />
         </div>
 
-        <Card.Description className="history-items">
+        <Card.Description className='history-items'>
           <List>{renderMoves()}</List>
         </Card.Description>
       </Card.Content>
