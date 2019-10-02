@@ -425,7 +425,7 @@ class Game extends Component {
 
         <Confirm
           open={open}
-          size='tiny'
+          size='mini'
           header='Reset game'
           content='Do you want to reset this game?'
           onCancel={this.toggleConfirm}

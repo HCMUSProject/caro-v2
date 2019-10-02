@@ -7,7 +7,8 @@ const History = ({ history, jumpTo, toggleSort, selected, sort }) => {
 
     // default : sort = true
     history.sort((p1, p2) => {
-      return p1.id <= p2.id === sort ? -1 : 1;
+      const comp = p1.id <= p2.id;
+      return comp === sort ? -1 : 1;
     });
 
     return history.map(step => {

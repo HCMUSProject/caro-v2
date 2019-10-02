@@ -18,6 +18,8 @@
     "react/prop-types": ["off"],
     "no-return-assign": ["off"],
     "quotes": ["error", "single"],
-    "jsx-quotes": ["error", "prefer-single"]
+    "jsx-quotes": ["error", "prefer-single"],
+    "no-mixed-operators": "error",
+    "no-extra-parens": ["error", "all", { "nestedBinaryExpressions": false }]
   }
 }
